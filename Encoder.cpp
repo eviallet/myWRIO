@@ -50,13 +50,15 @@ void Encoder::startThread(std::function<void(long enc, bool dir)> func, unsigned
 	if(th!=nullptr) delete th;
 
 	th = new std::thread([=](bool* running){
-		uint32_t enc;
+		uint32_t enc, oldEnc = 0;
 		bool dir;
 		while(*running) {
 			read(enc);
 			direction(dir);
-			if(enc>=threshold)
+			if(enc-oldEnc>=threshold) {
 				func((long)enc, dir);
+				oldEnc = enc;
+			}
 		}
 	}, std::ref(run));
 }
@@ -67,5 +69,7 @@ void Encoder::stopThread() {
 
 Encoder::~Encoder() {
 	// disable encoder
+	if(*run)
+		stopThread();
 	status = NiFpga_WriteU8(myrio_session, ENCACNFG, 0);
 }

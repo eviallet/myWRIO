@@ -36,16 +36,30 @@ int main() {
 #ifdef DEF_MOTOR
 	Time t = Time::stopwatch();
 
-	Motor motorLeft(PWM1);
+	Motor motorRight(PWM0);
+	motorRight.setSpeed(0);
 
+	Motor motorLeft(PWM1);
+	motorLeft.setDirection(CW);
+	int setpoint = 25;
+
+	Log log("log");
 	motorLeft.setInterrupt([&](long enc, bool dir) {
-		cout << t.elapsed_us() << "  " << enc << endl;
+		//cout << t.elapsed_us() << "  " << enc << endl;
+		log.println(t.elapsed_us(), setpoint, enc);
 		t.reset();
 	}, 1);
-
-	motorLeft.setSpeed(25);
-
-	Time::wait_s(10);
+	motorLeft.setSpeed(0);
+	Time::wait_s(1);
+	t.reset();
+	motorLeft.setSpeed(setpoint);
+	Time::wait_s(1);
+	setpoint = 50;
+	motorLeft.setSpeed(setpoint);
+	Time::wait_s(1);
+	motorLeft.setSpeed(0);
+	Time::wait_s(1);
+	log.close();
 #endif
 
 

@@ -27,10 +27,9 @@ long Time::elapsed_us() {
 
 	if(finalTime<startTime) {
 		long inRange = 1e6 - startTime;
-		finalTime += inRange;
-	}
-
-	return finalTime - startTime;
+		return finalTime + inRange;
+	} else
+		return finalTime - startTime;
 }
 
 long Time::elapsed_ms() {

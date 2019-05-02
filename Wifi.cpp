@@ -90,11 +90,11 @@ void Wifi::writeChar(char c) {
 }
 
 void Wifi::writeShort(short s) {
-	write(_socket, reinterpret_cast<const char*>(htons((uint16_t)&s)), sizeof(short));
+	write(_socket, reinterpret_cast<const char*>(&s), sizeof(short));
 }
 
 void Wifi::writeLong(long l) {
-	write(_socket, reinterpret_cast<const char*>(htonl((uint32_t)&l)), sizeof(long));
+	write(_socket, reinterpret_cast<const char*>(&l), sizeof(long));
 }
 
 Wifi::~Wifi() {
