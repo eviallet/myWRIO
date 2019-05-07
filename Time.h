@@ -9,11 +9,10 @@ namespace myRIO {
 
 class Time {
 public:
-	Time(long start = 0);
+	Time(unsigned long sec = 0, unsigned long nsec = 0);
 	static Time stopwatch();
 	void reset();
-	long elapsed_us();
-	long elapsed_ms();
+	long elapsed_ns();
 	~Time();
 
 	static void wait_s(long int s);
@@ -21,7 +20,8 @@ public:
 	static void wait_us(long int us);
 
 private:
-	long startTime;
+	unsigned long startTimeSec;
+	unsigned long startTimeNsec;
 };
 
 }

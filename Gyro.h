@@ -37,7 +37,7 @@ public:
 	~Gyro();
 	void calibrate(short samples = 100);
 	void readGyro(double&vx, double&vy, double&vz);
-	void startFreeRunningMode(std::function<void(double)> func);
+	void startFreeRunningMode(std::function<void(double&, double&)> func);
 	void stopFreeRunningMode();
 
 private:

@@ -8,7 +8,8 @@ class Log {
 public:
 	Log(std::string filename, char sep = ' ');
 	~Log();
-	void println(long time, int dat1, long dat2);
+	void println(long time, double sp, double csp, long enc);
+	void println(long time, double sp, double csp, long enc, long filtered);
 	void close();
 private:
 	std::ofstream file;

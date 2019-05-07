@@ -10,14 +10,18 @@ class PID {
 public:
 	PID(double kp, double ki);
 
-	int16_t compute(uint32_t input);
+	double compute(long enc);
+	void setSetpoint(double setpoint);
 
 	~PID();
 private:
 	Time stopwatch;
 
-	long setpoint;
-	long errSum;
+	const double toAngularSpeed = 360./(12.*52.734);
+
+	long lastEnc;
+	double setpoint;
+	double errSum;
 
 	double kp;
 	double ki;

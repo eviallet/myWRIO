@@ -35,10 +35,10 @@ void Gyro::calibrate(short samples) {
 		readGyro(x[i], y[i], z[i]);
 	}
 
-	long elapsed = t.elapsed_us();
+	unsigned long elapsed = t.elapsed_ns();
 
 	std::cout << std::endl << "Elapsed : " << elapsed << " us, which is " << elapsed/samples << " us per sample, or"
-			" a fq of " << 1.0e6/(1.*elapsed/samples) << " Hz" << std::endl << std::endl;
+			" a fq of " << 1.0e9/(1.*elapsed/samples) << " Hz" << std::endl << std::endl;
 
 
 	for(int i=0; i<samples; i++) {
@@ -74,7 +74,7 @@ void Gyro::readGyro(double&vx, double&vy, double&vz) {
 }
 
 
-void Gyro::startFreeRunningMode(std::function<void(double)> func) {
+void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 	*run = true;
 
 	if(th!=nullptr) delete th;
@@ -108,10 +108,10 @@ void Gyro::startFreeRunningMode(std::function<void(double)> func) {
 			if(abs(oldvx-vx)<1)
 				vx = oldvx;
 
-			dt = stopwatch.elapsed_us() * 1e-6;
-			x = oldx + vx * dt;
+			dt = stopwatch.elapsed_ns() * 1e-9;
+			x = oldx + vx * dt * 1e3;
 
-			func(x);
+			func(x, dt);
 
 			stopwatch.reset();
 
@@ -128,5 +128,7 @@ void Gyro::stopFreeRunningMode() {
 
 
 Gyro::~Gyro() {
+	if(*run)
+		*run = false;
 	delete [] regs;
 }

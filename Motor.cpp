@@ -3,10 +3,10 @@
 using namespace myRIO;
 
 // work only for PWM0 & PWM1
-Motor::Motor(uint32_t port) : speed(0), direction(CCW),
+Motor::Motor(uint32_t port, double angularCoef) : speed(0), angularCoef(angularCoef), direction(CCW),
 		pin(port==PWM0?A2:A3)
 {
-	channel = new PWM(port, 1e3, speed);
+	channel = new PWM(port, 10e3, speed);
 	MyRio_ReturnIfNotSuccess(status,
 			"PWM initialisation error");
 	enc = new Encoder(port!=PWM0); // if port==PWM0 : (port!=PWM0)=0=ENCA
@@ -14,12 +14,17 @@ Motor::Motor(uint32_t port) : speed(0), direction(CCW),
 			"Encoder initialisation error");
 }
 
-void Motor::setSpeed(uint8_t speed) {
+void Motor::setSpeed(double speed) {
 	this->speed = speed;
 	channel->setDutyCycle(speed);
 }
 
-uint8_t Motor::getSpeed() {
+void Motor::setAngularSpeed(double speed) {
+	this->speed = speed/angularCoef;
+	channel->setDutyCycle(this->speed);
+}
+
+double Motor::getSpeed() {
 	return speed;
 }
 

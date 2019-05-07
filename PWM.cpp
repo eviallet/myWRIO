@@ -3,7 +3,7 @@
 using namespace myRIO;
 extern NiFpga_Session myrio_session;
 
-PWM::PWM(uint32_t out, long frequency, uint8_t duty_cycle) : out(out), dutyCycle(duty_cycle) {
+PWM::PWM(uint32_t out, long frequency, double duty_cycle) : out(out), dutyCycle(duty_cycle) {
 	uint8_t select;
 	status = NiFpga_ReadU8(myrio_session, SYSSELECTA, &select);
 	select |= (1<<2) | (1<<3);
@@ -39,8 +39,8 @@ PWM::PWM(uint32_t out, long frequency, uint8_t duty_cycle) : out(out), dutyCycle
 			NiFpga_WriteU16(myrio_session, outmax, max));
 }
 
-void PWM::setDutyCycle(uint16_t dutyCycle) {
-	uint16_t cmp = round(max*dutyCycle/100);
+void PWM::setDutyCycle(double dutyCycle) {
+	uint16_t cmp = round((double)max*dutyCycle/100.0);
 	status = NiFpga_WriteU16(myrio_session, outcmp, cmp);
 }
 

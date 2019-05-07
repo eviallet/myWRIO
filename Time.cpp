@@ -2,38 +2,33 @@
 
 using namespace myRIO;
 
-Time::Time(long start) : startTime(start) {}
+Time::Time(unsigned long sec, unsigned long nsec) : startTimeSec(sec), startTimeNsec(nsec) {}
 
-// Cannot measure more than 1s
+// Cannot measure more than 4s
 Time Time::stopwatch() {
-	struct timeval currentTime;
-	gettimeofday(&currentTime, NULL);
+	struct timespec currentTime;
+	clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-	return Time(currentTime.tv_usec);
+	return Time(currentTime.tv_sec, currentTime.tv_nsec);
 }
 
 void Time::reset() {
-	struct timeval currentTime;
-	gettimeofday(&currentTime, NULL);
+	struct timespec currentTime;
+	clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-	startTime = currentTime.tv_usec;
+	startTimeSec = currentTime.tv_sec;
+	startTimeNsec = currentTime.tv_nsec;
 }
 
-long Time::elapsed_us() {
-	struct timeval currentTime;
-	gettimeofday(&currentTime, NULL);
+long Time::elapsed_ns() {
+	struct timespec currentTime;
+	clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-	long finalTime = currentTime.tv_usec;
+	unsigned long d_sec = currentTime.tv_sec - startTimeSec;
+	long d_nsec =  startTimeNsec - currentTime.tv_nsec;
+	unsigned long finalTime = d_sec * 1e9L - d_nsec;
 
-	if(finalTime<startTime) {
-		long inRange = 1e6 - startTime;
-		return finalTime + inRange;
-	} else
-		return finalTime - startTime;
-}
-
-long Time::elapsed_ms() {
-	return elapsed_us()*1000;
+	return finalTime;
 }
 
 void Time::wait_s(long int s) {

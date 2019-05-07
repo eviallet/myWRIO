@@ -18,14 +18,16 @@ class PWM;
 
 class Motor {
 public:
-	Motor(uint32_t port);
-	void setSpeed(uint8_t speed);
-	uint8_t getSpeed();
+	Motor(uint32_t port, double angularCoef);
+	void setSpeed(double speed);
+	void setAngularSpeed(double speed);
+	double getSpeed();
 	void setDirection(bool dir);
 	void setInterrupt(std::function<void(long, bool)> func, unsigned int threshold);
 	~Motor();
 private:
-	uint8_t speed; // 0->100
+	double speed; // 0->100
+	double angularCoef;
 	bool direction;
 	PWM* channel;
 	Encoder* enc;

@@ -13,13 +13,13 @@ namespace myRIO {
 
 class PWM {
 public:
-	PWM(uint32_t out, long frequency, uint8_t duty_cycle);
-	void setDutyCycle(uint16_t dutyCycle);
+	PWM(uint32_t out, long frequency, double duty_cycle);
+	void setDutyCycle(double dutyCycle);
 	~PWM();
 private:
 	uint32_t out;
 	uint16_t max;
-	uint8_t dutyCycle;
+	double dutyCycle;
 	uint32_t outcs;
 	uint32_t outmax;
 	uint32_t outcmp;
