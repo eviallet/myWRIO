@@ -62,9 +62,6 @@ int main() {
 	// GYROSCOPE
 	Gyro gyro;
 	double xRotOff, angle;
-	// preventing gyroscope from drifting
-	unsigned char updateCount = 0;
-	const unsigned char updateLimit = 7, difLimit = 7;
 	// initializing and calibrating the gyro
 	if(myRIO_error()) {cout << "Gyro - Error while initializing" << endl; return -1;}
 	gyro.calibrate();
@@ -73,8 +70,9 @@ int main() {
 	DIO::writeLed(LED0, HIGH);
 
 	// COMPLEMENTARY FILTER
-	const double GYRO_WEIGHT = 0.5;
+	const double GYRO_WEIGHT = 0.75;
 
+#ifdef DEF_PENDULUM
 	// PENDULUM
 	PendulumPID pendulumPid(1, 0.01, 0.01);
 	pendulumPid.setSetpoint(90);
@@ -92,6 +90,7 @@ int main() {
 	DIO::writeLed(LED1, LOW);
 	DIO::writeLed(LED2, LOW);
 	DIO::writeLed(LED3, LOW);
+#endif
 
 	// starting the angle thread
 	gyro.startFreeRunningMode([&](double &xRot, double &dt){
@@ -111,7 +110,7 @@ int main() {
 
 
 		// gyro angle at 180° will be  from calibration : offset that
-		xRotOff = 180 + xRot;
+		xRotOff = 180. + xRot;
 
 		// filter accelerometer data
 		accFiltered = accFilterA*oldAcc + accFilterB*oldAccFiltered;
@@ -120,18 +119,6 @@ int main() {
 
 		// complementary filter
 		angle = GYRO_WEIGHT*xRotOff + (1.-GYRO_WEIGHT)*accFiltered;
-
-		// if gyro values are drifting too much
-		if(abs((int)xRotOff - (int)xAcc) > difLimit) {
-			updateCount ++;
-			// for several consecutive times
-			if(updateCount >= updateLimit) {
-				// then get the accelerometer value (to remove integral error)
-				xRot = xAcc - 180;
-				updateCount = 0;
-			}
-		} else
-			updateCount = 0;
 
 
 #ifdef DEF_PENDULUM
@@ -144,6 +131,9 @@ int main() {
 
 		printf("dt = %ld, xRot = %f, xAcc = %f, angle = %f, motorSpeed = %f\n", (unsigned long)dt*1e9, xRotOff, xAcc, angle, motorSpeed);
 		logA.println(dt*1e9, angle, motorSpeed);
+#else
+		cout << "dt " << dt*1e9 << " xRot " << xRotOff << " xAcc " << xAcc << " angle " << angle << endl;
+		logA.println(dt*1e9, xRotOff, xAcc, angle);
 #endif
 	});
 #endif
@@ -151,6 +141,8 @@ int main() {
 	Wifi w([&](short setpoint) {});
 	while(!w.isConnected());
 #endif
+
+	while(1);
 
 
 #ifdef DEF_I2C

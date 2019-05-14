@@ -1,8 +1,3 @@
-// TODO
-// complementary filter (anciennces valeurs gyro)
-// bande passante
-
-
 #include "Gyro.h"
 
 using namespace myRIO;
@@ -18,7 +13,7 @@ Gyro::Gyro() : regs(new uint8_t[6]), gyroStatusVal(0), xOff(0), yOff(0), zOff(0)
 	}
 
 	if(!gyro->write(L3G4200D_CTRL_REG1,
-				   0b11<<6 | // DR<1:0> : data rate
+				   0b00<<6 | // DR<1:0> : data rate
 				   0b00<<4 | // BW<1:0> : bandwidth
 				   0b1111)   // power mode : normal, X/Y/Z enabled
 		||!gyro->write(L3G4200D_CTRL_REG5,0x80)) // 250dps : 8.75mdps/LSB
@@ -110,8 +105,10 @@ void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 			vx*=0.00875;
 			vx-=xOff;
 
-			if(abs(oldvx-vx)<1)
-				vx = oldvx;
+			vx = vx*0.3 + oldvx*0.7;
+
+			//if(abs(oldvx-vx)<1)
+			//	vx = oldvx;
 
 			dt = stopwatch.elapsed_ns() * 1e-9;
 			x = oldx + vx * dt * 1e3;
