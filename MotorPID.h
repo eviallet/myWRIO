@@ -15,17 +15,14 @@ public:
 	double compute(long enc);
 	void setSetpoint(double setpoint);
 
-	double getAvgSpeed();
-
 	~MotorPID();
 private:
 	Time stopwatch;
 
-	const double toAngularSpeed = 360./(12.*52.734);
-
-	double lastSpeeds[NB_AVG];
+	const double toAngle = 360./(12.*52.734);
 
 	long lastEnc;
+
 	double setpoint;
 	double errSum;
 

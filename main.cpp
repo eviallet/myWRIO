@@ -5,8 +5,9 @@
 #include <math.h>
 
 //#define DEF_WIFI
-#define DEF_MOTOR
-//#define DEF_I2C
+//#define DEF_MOTOR
+#define DEF_I2C
+//#define DEF_PENDULUM
 
 using namespace std;
 using namespace myRIO;
@@ -22,25 +23,27 @@ int main() {
 	Time timerLeft =  Time::stopwatch();
 	Time timerRight = Time::stopwatch();
 
-	MotorPID motorLeftPid(1.75, 40);
-	MotorPID motorRightPid(1.5, 35);
+	MotorPID motorLeftPid(25, 0.01);
+	MotorPID motorRightPid(25, 0.01);
 
 	Motor motorLeft(PWM1, CCW, 8.823);
 	Motor motorRight(PWM0, CW, 8.831);
 
-	//Log logL("logL"), logR("logR");
+	double setpoint = 360;
+
+	Log logL("logL"), logR("logR");
 	motorLeft.setInterrupt([&](long enc, bool dir) {
 		if(motorLeft.getDefaultDirection()==CCW) enc = -enc;
 		double correctedCmd = motorLeftPid.compute(enc);
-		motorLeft.setAngularSpeed(correctedCmd);
-		//logL.println(timerLeft.elapsed_ns(), setpoint, correctedCmd, motorLeftPid.getAvgSpeed());
+		motorLeft.setAngularSpeedAndDirection(correctedCmd);
+		logL.println(timerLeft.elapsed_ns(), setpoint, correctedCmd, enc);
 		timerLeft.reset();
 	}, 1);
 	motorRight.setInterrupt([&](long enc, bool dir) {
 		if(motorRight.getDefaultDirection()==CCW) enc = -enc;
 		double correctedCmd = motorRightPid.compute(enc);
-		motorRight.setAngularSpeed(correctedCmd);
-		//logR.println(timerRight.elapsed_ns(), setpoint, correctedCmd, motorRightPid.getAvgSpeed());
+		motorRight.setAngularSpeedAndDirection(correctedCmd);
+		logR.println(timerRight.elapsed_ns(), setpoint, correctedCmd, enc);
 		timerRight.reset();
 	}, 1);
 #endif
@@ -131,7 +134,7 @@ int main() {
 			updateCount = 0;
 
 
-
+#ifdef DEF_PENDULUM
 
 		motorSpeed = pendulumPid.compute(angle);
 		motorLeft.setAngularSpeedAndDirection(motorSpeed);
@@ -141,6 +144,7 @@ int main() {
 
 		printf("dt = %ld, xRot = %f, xAcc = %f, angle = %f, motorSpeed = %f\n", (unsigned long)dt*1e9, xRotOff, xAcc, angle, motorSpeed);
 		logA.println(dt*1e9, angle, motorSpeed);
+#endif
 	});
 #endif
 #ifdef DEF_WIFI
@@ -148,12 +152,6 @@ int main() {
 	while(!w.isConnected());
 #endif
 
-	motorLeftPid.setSetpoint(720);
-	motorLeft.setAngularSpeed(720);
-	motorRightPid.setSetpoint(720);
-	motorRight.setAngularSpeed(720);
-
-	Time::wait_s(2);
 
 #ifdef DEF_I2C
 	logA.close();
