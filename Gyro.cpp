@@ -1,3 +1,8 @@
+// TODO
+// complementary filter (anciennces valeurs gyro)
+// bande passante
+
+
 #include "Gyro.h"
 
 using namespace myRIO;

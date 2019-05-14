@@ -81,12 +81,12 @@ namespace myRIO {
 
 	class DIO {
 	public:
-		void writeLed(int led, bool state);
+		static void writeLed(int led, bool state);
 		static void writePin(int pin, bool state);
 		static int readPin (int pin);
 	private:
 		static void parsePin(int pin, uint32_t *dirReg, uint32_t *pinsReg, bool io);
-		static uint8_t *DOLED30_Status;
+		static uint8_t DOLED30_Status;
 	};
 } // namespace
 

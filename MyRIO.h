@@ -14,7 +14,8 @@
 #include "Time.h"
 #include "Wifi.h"
 #include "Motor.h"
-#include "PID.h"
+#include "MotorPID.h"
+#include "PendulumPID.h"
 #include "Log.h"
 
 

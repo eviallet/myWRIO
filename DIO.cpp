@@ -3,13 +3,13 @@
 using namespace myRIO;
 extern NiFpga_Session myrio_session; // global variable defined in CAPI/MyRio.c
 
-uint8_t *DIO::DOLED30_Status = 0;
+uint8_t DIO::DOLED30_Status = 0;
 
 void DIO::writeLed(int led, bool state) {
-	if(state) *DOLED30_Status |= (1<<led);
-	else	  *DOLED30_Status &=~(1<<led);
+	if(state) DOLED30_Status |= (1<<led);
+	else	  DOLED30_Status &=~(1<<led);
 
-	status = NiFpga_WriteU8(myrio_session, DOLED30, *DOLED30_Status);
+	status = NiFpga_WriteU8(myrio_session, DOLED30, DOLED30_Status);
 }
 
 void DIO::parsePin(int pin, uint32_t *dirReg, uint32_t *pinsReg, bool io) {

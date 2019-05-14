@@ -1,23 +1,29 @@
-#ifndef PID_H_
-#define PID_H_
+#ifndef MotorPID_H_
+#define MotorPID_H_
 
 #include "MyRIO.h"
 #include "Time.h"
 
+#define NB_AVG 10
+
 namespace myRIO {
 
-class PID {
+class MotorPID {
 public:
-	PID(double kp, double ki);
+	MotorPID(double kp, double ki);
 
 	double compute(long enc);
 	void setSetpoint(double setpoint);
 
-	~PID();
+	double getAvgSpeed();
+
+	~MotorPID();
 private:
 	Time stopwatch;
 
 	const double toAngularSpeed = 360./(12.*52.734);
+
+	double lastSpeeds[NB_AVG];
 
 	long lastEnc;
 	double setpoint;
@@ -29,4 +35,4 @@ private:
 
 }
 
-#endif /* PID_H_ */
+#endif /* MotorPID_H_ */

@@ -4,9 +4,9 @@
 #include "MyRIO.h"
 #include <math.h>
 
-//#define DEF_I2C
 //#define DEF_WIFI
 #define DEF_MOTOR
+//#define DEF_I2C
 
 using namespace std;
 using namespace myRIO;
@@ -18,8 +18,35 @@ double map(double x, double in_min, double in_max, double out_min, double out_ma
 int main() {
 	if(!myRIO_init()) {cout << "Error initializing myRIO"; return -1;}
 
+#ifdef DEF_MOTOR
+	Time timerLeft =  Time::stopwatch();
+	Time timerRight = Time::stopwatch();
+
+	MotorPID motorLeftPid(1.75, 40);
+	MotorPID motorRightPid(1.5, 35);
+
+	Motor motorLeft(PWM1, CCW, 8.823);
+	Motor motorRight(PWM0, CW, 8.831);
+
+	//Log logL("logL"), logR("logR");
+	motorLeft.setInterrupt([&](long enc, bool dir) {
+		if(motorLeft.getDefaultDirection()==CCW) enc = -enc;
+		double correctedCmd = motorLeftPid.compute(enc);
+		motorLeft.setAngularSpeed(correctedCmd);
+		//logL.println(timerLeft.elapsed_ns(), setpoint, correctedCmd, motorLeftPid.getAvgSpeed());
+		timerLeft.reset();
+	}, 1);
+	motorRight.setInterrupt([&](long enc, bool dir) {
+		if(motorRight.getDefaultDirection()==CCW) enc = -enc;
+		double correctedCmd = motorRightPid.compute(enc);
+		motorRight.setAngularSpeed(correctedCmd);
+		//logR.println(timerRight.elapsed_ns(), setpoint, correctedCmd, motorRightPid.getAvgSpeed());
+		timerRight.reset();
+	}, 1);
+#endif
+
 #ifdef DEF_I2C
-	Log log("log");
+	Log logA("logA");
 
 	// ACCELEROMETER
 	Acc acc;
@@ -40,8 +67,28 @@ int main() {
 	gyro.calibrate();
 	if(myRIO_error()) {cout << "Gyro - Error while calibrating" << endl; return -1;}
 
+	DIO::writeLed(LED0, HIGH);
+
 	// COMPLEMENTARY FILTER
 	const double GYRO_WEIGHT = 0.5;
+
+	// PENDULUM
+	PendulumPID pendulumPid(1, 0.01, 0.01);
+	pendulumPid.setSetpoint(90);
+	double motorSpeed;
+
+	// COUNTDOWN
+	Time::wait_s(2);
+	DIO::writeLed(LED1, HIGH);
+	Time::wait_s(2);
+	DIO::writeLed(LED2, HIGH);
+	Time::wait_s(2);
+	DIO::writeLed(LED3, HIGH);
+	Time::wait_s(2);
+	DIO::writeLed(LED0, LOW);
+	DIO::writeLed(LED1, LOW);
+	DIO::writeLed(LED2, LOW);
+	DIO::writeLed(LED3, LOW);
 
 	// starting the angle thread
 	gyro.startFreeRunningMode([&](double &xRot, double &dt){
@@ -84,49 +131,33 @@ int main() {
 			updateCount = 0;
 
 
-		printf("xRot = %f, xAcc = %f, angle = %f, dt = %f\n", xRotOff, xAcc, angle, dt*1e9);
-		log.println(dt*1e9, xRotOff, xAcc, angle);
+
+
+		motorSpeed = pendulumPid.compute(angle);
+		motorLeft.setAngularSpeedAndDirection(motorSpeed);
+		motorLeftPid.setSetpoint(motorSpeed);
+		motorRight.setAngularSpeedAndDirection(motorSpeed);
+		motorRightPid.setSetpoint(motorSpeed);
+
+		printf("dt = %ld, xRot = %f, xAcc = %f, angle = %f, motorSpeed = %f\n", (unsigned long)dt*1e9, xRotOff, xAcc, angle, motorSpeed);
+		logA.println(dt*1e9, angle, motorSpeed);
 	});
-	while(1);
 #endif
 #ifdef DEF_WIFI
 	Wifi w([&](short setpoint) {});
 	while(!w.isConnected());
 #endif
-#ifdef DEF_MOTOR
-	Time t = Time::stopwatch();
-	PID motorRightPid(1.5, 35);
 
-	Motor motorLeft(PWM1, 8.846);
-	motorLeft.setDirection(CW);
-	motorLeft.setSpeed(20);
+	motorLeftPid.setSetpoint(720);
+	motorLeft.setAngularSpeed(720);
+	motorRightPid.setSetpoint(720);
+	motorRight.setAngularSpeed(720);
 
-	Motor motorRight(PWM0, 9.32);
-	motorRight.setDirection(CW);
-
-	double setpoint = 360;
-	motorRightPid.setSetpoint(setpoint);
-
-	double a = 0.2592, b = 0.7408;
-	double yf, oldYf = 0, oldU = 0;
-
-	Log log("log");
-	motorRight.setInterrupt([&](long enc, bool dir) {
-		yf = a*oldU + b*oldYf;
-		oldYf = yf;
-		oldU = enc;
-
-		double correctedCmd = motorRightPid.compute(yf);
-		motorRight.setAngularSpeed(correctedCmd);
-		log.println(t.elapsed_ns(), setpoint, correctedCmd, enc, yf);
-		t.reset();
-	}, 1);
-
-	motorRight.setAngularSpeed(setpoint);
 	Time::wait_s(2);
-	log.close();
-#endif
 
+#ifdef DEF_I2C
+	logA.close();
+#endif
 
 	return 0;
 }
