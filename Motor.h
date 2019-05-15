@@ -26,6 +26,7 @@ public:
 	void setDirection(bool dir);
 	bool getDefaultDirection();
 	void setInterrupt(std::function<void(long, bool)> func, unsigned int threshold);
+	long getEncoderPulses();
 	~Motor();
 private:
 	double speed; // 0->100

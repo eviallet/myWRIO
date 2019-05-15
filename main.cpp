@@ -23,29 +23,39 @@ int main() {
 	Time timerLeft =  Time::stopwatch();
 	Time timerRight = Time::stopwatch();
 
-	MotorPID motorLeftPid(25, 0.01);
-	MotorPID motorRightPid(25, 0.01);
-
 	Motor motorLeft(PWM1, CCW, 8.823);
 	Motor motorRight(PWM0, CW, 8.831);
 
-	double setpoint = 360;
+	MotorPID motorLeftPid(0.95, 40);
+	MotorPID motorRightPid(1.5, 35);
 
 	Log logL("logL"), logR("logR");
-	motorLeft.setInterrupt([&](long enc, bool dir) {
-		if(motorLeft.getDefaultDirection()==CCW) enc = -enc;
-		double correctedCmd = motorLeftPid.compute(enc);
-		motorLeft.setAngularSpeedAndDirection(correctedCmd);
-		logL.println(timerLeft.elapsed_ns(), setpoint, correctedCmd, enc);
-		timerLeft.reset();
-	}, 1);
-	motorRight.setInterrupt([&](long enc, bool dir) {
-		if(motorRight.getDefaultDirection()==CCW) enc = -enc;
-		double correctedCmd = motorRightPid.compute(enc);
-		motorRight.setAngularSpeedAndDirection(correctedCmd);
-		logR.println(timerRight.elapsed_ns(), setpoint, correctedCmd, enc);
-		timerRight.reset();
-	}, 1);
+
+	double setpoint = 360;
+
+	motorLeftPid.setSetpoint(setpoint);
+	motorRightPid.setSetpoint(setpoint);
+
+	const long sampleTimeUs = 1000;
+
+	Time timer = Time::stopwatch();
+	while(timer.elapsed_ns()*1e-9 < 2) {
+		long encL = motorLeft.getEncoderPulses();
+		if(motorLeft.getDefaultDirection()==CCW) encL = - encL;
+		double correctedL = motorLeftPid.compute(encL);
+		motorLeft.setAngularSpeedAndDirection(correctedL);
+
+		logL.println(sampleTimeUs, setpoint, correctedL, motorLeftPid.getAvgSpeed());
+
+		long encR = motorRight.getEncoderPulses();
+		if(motorRight.getDefaultDirection()==CCW) encR = - encR;
+		double correctedR = motorRightPid.compute(encR);
+		motorRight.setAngularSpeedAndDirection(correctedR);
+
+		logR.println(sampleTimeUs, setpoint, correctedR, motorRightPid.getAvgSpeed());
+
+		Time::wait_us(sampleTimeUs);
+	}
 #endif
 
 #ifdef DEF_I2C
@@ -147,9 +157,6 @@ int main() {
 	});
 #endif
 
-	motorLeftPid.setSetpoint(360);
-	motorLeft.setSpeed(10);
-	Time::wait_s(2);
 
 #ifdef DEF_I2C
 	logA.close();

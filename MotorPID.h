@@ -4,7 +4,7 @@
 #include "MyRIO.h"
 #include "Time.h"
 
-#define NB_AVG 10
+#define NB_AVG 40
 
 namespace myRIO {
 
@@ -15,21 +15,25 @@ public:
 	double compute(long enc);
 	void setSetpoint(double setpoint);
 
+	double getAvgSpeed();
+
 	~MotorPID();
 private:
 	Time stopwatch;
 
-	const double toAngle = 360./(12.*52.734);
+	const double toAngularSpeed = 360./(12.*52.734);
+
+	double lastSpeeds[NB_AVG];
 
 	long lastEnc;
-
 	double setpoint;
 	double errSum;
 
-	double kp;
-	double ki;
+	double kp, ki;
 };
 
 }
+
+
 
 #endif /* MotorPID_H_ */

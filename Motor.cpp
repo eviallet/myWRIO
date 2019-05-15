@@ -18,6 +18,12 @@ Motor::Motor(uint32_t port, bool defaultDirection, double angularCoef) :
 	setSpeed(0);
 }
 
+long Motor::getEncoderPulses() {
+	uint32_t e;
+	enc->read(e);
+	return (long)e;
+}
+
 void Motor::setSpeed(double speed) {
 	this->speed = speed;
 	channel->setDutyCycle(speed);
