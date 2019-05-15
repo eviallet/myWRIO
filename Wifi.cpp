@@ -68,7 +68,7 @@ void Wifi::openServer() {
 	} while(true);
 }
 
-void Wifi::updateAngle(short& angle) {
+void Wifi::updateAngle(short angle) {
 	if(connected)
 		writeShort(angle);
 }

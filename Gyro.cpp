@@ -81,9 +81,7 @@ void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 
 	th = new std::thread([this, func](bool* running) {
 		Time stopwatch = Time::stopwatch();
-		double x, vx;
-		double oldx = 0, oldvx = 0;
-		double dt;
+		double vx, oldvx = 0, dt;
 		while(*run) {
 			// wait for new data on the gyro
 			while(!gyroStatusVal&(1<<3)) {
@@ -106,19 +104,13 @@ void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 			vx-=xOff;
 
 			vx = vx*0.3 + oldvx*0.7;
-
-			//if(abs(oldvx-vx)<1)
-			//	vx = oldvx;
+			oldvx = vx;
 
 			dt = stopwatch.elapsed_ns() * 1e-9;
-			x = oldx + vx * dt * 1e3;
 
-			func(x, dt);
+			func(vx, dt);
 
 			stopwatch.reset();
-
-			oldx = x;
-			oldvx = vx;
 		}
 	}, std::ref(run));
 	th->detach();

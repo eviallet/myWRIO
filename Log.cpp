@@ -6,6 +6,10 @@ Log::Log(std::string filename, char sep) : sep(sep) {
 	file.open("/home/"+filename);
 }
 
+void Log::println(long time, double sp) {
+	file << time << sep << sp << std::endl;
+}
+
 void Log::println(long time, double sp, double csp) {
 	file << time << sep << sp << sep << csp << std::endl;
 }

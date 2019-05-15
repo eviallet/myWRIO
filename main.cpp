@@ -5,8 +5,8 @@
 #include <math.h>
 
 //#define DEF_WIFI
-//#define DEF_MOTOR
-#define DEF_I2C
+#define DEF_MOTOR
+//#define DEF_I2C
 //#define DEF_PENDULUM
 
 using namespace std;
@@ -61,7 +61,7 @@ int main() {
 
 	// GYROSCOPE
 	Gyro gyro;
-	double xRotOff, angle;
+	double angle = 180;
 	// initializing and calibrating the gyro
 	if(myRIO_error()) {cout << "Gyro - Error while initializing" << endl; return -1;}
 	gyro.calibrate();
@@ -70,12 +70,13 @@ int main() {
 	DIO::writeLed(LED0, HIGH);
 
 	// COMPLEMENTARY FILTER
-	const double GYRO_WEIGHT = 0.75;
+	const double GYRO_WEIGHT = 0.7;
 
 #ifdef DEF_PENDULUM
 	// PENDULUM
 	PendulumPID pendulumPid(1, 0.01, 0.01);
-	pendulumPid.setSetpoint(90);
+	double pendulumSetpoint = 90;
+	pendulumPid.setSetpoint(pendulumSetpoint);
 	double motorSpeed;
 
 	// COUNTDOWN
@@ -91,9 +92,18 @@ int main() {
 	DIO::writeLed(LED2, LOW);
 	DIO::writeLed(LED3, LOW);
 #endif
+#ifdef DEF_WIFI
+	Wifi w([&](short setpoint) {
+#ifdef DEF_PENDULUM
+		pendulumPid.setSetpoint(pendulumSetpoint);
+#endif
+		cout << "Setpoint = " << setpoint << endl;
+	});
+	while(!w.isConnected());
+#endif
 
 	// starting the angle thread
-	gyro.startFreeRunningMode([&](double &xRot, double &dt){
+	gyro.startFreeRunningMode([&](double &vxRot, double &dt){
 		system("clear");
 
 		// reading accelerometer values
@@ -108,17 +118,13 @@ int main() {
 		if(xAcc<90) xAcc = map(xAcc, 0, 78.894271, 0, 90);
 		else xAcc = map(xAcc, 103.148749, 180, 90, 180);
 
-
-		// gyro angle at 180° will be  from calibration : offset that
-		xRotOff = 180. + xRot;
-
 		// filter accelerometer data
 		accFiltered = accFilterA*oldAcc + accFilterB*oldAccFiltered;
 		oldAccFiltered = accFiltered;
 		oldAcc = xAcc;
 
 		// complementary filter
-		angle = GYRO_WEIGHT*xRotOff + (1.-GYRO_WEIGHT)*accFiltered;
+		angle = GYRO_WEIGHT*(angle + vxRot * dt) + (1.-GYRO_WEIGHT)*accFiltered;
 
 
 #ifdef DEF_PENDULUM
@@ -132,18 +138,18 @@ int main() {
 		printf("dt = %ld, xRot = %f, xAcc = %f, angle = %f, motorSpeed = %f\n", (unsigned long)dt*1e9, xRotOff, xAcc, angle, motorSpeed);
 		logA.println(dt*1e9, angle, motorSpeed);
 #else
-		cout << "dt " << dt*1e9 << " xRot " << xRotOff << " xAcc " << xAcc << " angle " << angle << endl;
-		logA.println(dt*1e9, xRotOff, xAcc, angle);
+		cout << "dt " << dt*1e9 << " xAcc " << xAcc << " angle " << angle << endl;
+		logA.println(dt*1e9, xAcc, angle);
+#endif
+#ifdef DEF_WIFI
+		w.updateAngle((short)angle);
 #endif
 	});
 #endif
-#ifdef DEF_WIFI
-	Wifi w([&](short setpoint) {});
-	while(!w.isConnected());
-#endif
 
-	while(1);
-
+	motorLeftPid.setSetpoint(360);
+	motorLeft.setSpeed(10);
+	Time::wait_s(2);
 
 #ifdef DEF_I2C
 	logA.close();

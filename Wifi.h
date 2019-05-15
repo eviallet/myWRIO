@@ -18,7 +18,7 @@ namespace myRIO {
 		
 		void openServer();
 		bool isConnected();
-		void updateAngle(short&angle);
+		void updateAngle(short angle);
 		void updateEncoder(uint8_t setpoint, uint32_t enc);
 
 	private:
