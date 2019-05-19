@@ -6,11 +6,17 @@
 
 namespace myRIO {
 
+/**
+* Encoder channels
+*/
 enum {
 	ENCA,
 	ENCB
 };
 
+/**
+* Embedded encoder
+*/
 class Encoder {
 public:
 	Encoder(uint8_t channel);

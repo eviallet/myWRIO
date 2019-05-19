@@ -15,22 +15,27 @@
 
 namespace myRIO {
 
-constexpr uint8_t L3G4200D_WHO_AM_I   = 0x0F;
-constexpr uint8_t L3G4200D_CTRL_REG1  = 0x20;
-constexpr uint8_t L3G4200D_CTRL_REG2  = 0x21;
-constexpr uint8_t L3G4200D_CTRL_REG3  = 0x22;
-constexpr uint8_t L3G4200D_CTRL_REG4  = 0x23;
-constexpr uint8_t L3G4200D_CTRL_REG5  = 0x24;
-constexpr uint8_t L3G4200D_STATUS_REG = 0x27;
-constexpr uint8_t L3G4200D_OUT_X_L    = 0x28;
-constexpr uint8_t L3G4200D_OUT_X_H    = 0x29;
-constexpr uint8_t L3G4200D_OUT_Y_L    = 0x2A;
-constexpr uint8_t L3G4200D_OUT_Y_H    = 0x2B;
-constexpr uint8_t L3G4200D_OUT_Z_L    = 0x2C;
-constexpr uint8_t L3G4200D_OUT_Z_H    = 0x2D;
+namespace GyroRegisters {
+	constexpr uint8_t L3G4200D_WHO_AM_I   = 0x0F;
+	constexpr uint8_t L3G4200D_CTRL_REG1  = 0x20;
+	constexpr uint8_t L3G4200D_CTRL_REG2  = 0x21;
+	constexpr uint8_t L3G4200D_CTRL_REG3  = 0x22;
+	constexpr uint8_t L3G4200D_CTRL_REG4  = 0x23;
+	constexpr uint8_t L3G4200D_CTRL_REG5  = 0x24;
+	constexpr uint8_t L3G4200D_STATUS_REG = 0x27;
+	constexpr uint8_t L3G4200D_OUT_X_L    = 0x28;
+	constexpr uint8_t L3G4200D_OUT_X_H    = 0x29;
+	constexpr uint8_t L3G4200D_OUT_Y_L    = 0x2A;
+	constexpr uint8_t L3G4200D_OUT_Y_H    = 0x2B;
+	constexpr uint8_t L3G4200D_OUT_Z_L    = 0x2C;
+	constexpr uint8_t L3G4200D_OUT_Z_H    = 0x2D;
+}
 
 class I2C;
 
+/**
+* Helper class to use with a L3G4200D gyro sensor
+*/
 class Gyro {
 public:
 	Gyro();

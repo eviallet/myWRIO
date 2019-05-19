@@ -6,6 +6,10 @@
 #include "MyRIO.h"
 
 namespace myRIO {
+	
+	/**
+	* Embedded accelerometer
+	*/
 	class Acc {
 	public:
 		Acc();
@@ -15,12 +19,12 @@ namespace myRIO {
 		void y(double &v);
 		void z(double &v);
 		void all(double &x, double &y, double& z);
-
-		void setScale(double scale);
 	private:
 		void readAcc(int, double&);
 		double scale;
 	};
 }
+
+/** \example example_acc.cpp */
 
 #endif /* ACC_H_ */

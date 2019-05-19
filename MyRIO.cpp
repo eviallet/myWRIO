@@ -2,7 +2,7 @@
 
 using namespace myRIO;
 
-NiFpga_Status status = 0;
+NiFpga_Status status = 0; /**< Initialize the status to 0 */
 
 bool myRIO::myRIO_init() {
 	status = MyRio_Open();

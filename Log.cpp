@@ -1,7 +1,14 @@
 #include "Log.h"
 
 using namespace std;
+using namespace myRIO;
 
+/**
+ * A simple constructor for a Log.
+ * Path of the resulting file: /home/filename
+ * @param filename The filename to give. You can pass an extension if you want.
+ * @param sep The separator between each data on a line
+ */
 Log::Log(std::string filename, char sep) : sep(sep) {
 	file.open("/home/"+filename);
 }

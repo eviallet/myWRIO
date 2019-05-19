@@ -11,6 +11,10 @@
 #include <cstdio> // perror
 
 namespace myRIO {
+	
+	/**
+	* Use this class to exchange data via wifi
+	*/
 	class Wifi {
 	public:
 		Wifi(std::function<void(short)> func);
@@ -19,13 +23,12 @@ namespace myRIO {
 		void openServer();
 		bool isConnected();
 		void updateAngle(short angle);
-		void updateEncoder(uint8_t setpoint, uint32_t enc);
 
 	private:
 		bool connected;
 		int _socket;
 		std::thread _socketThread;
-		std::function<void(short)> _func;
+		std::function<void(short)> _func; /**< Function to call when receiving data */
 
 		void writeChar(char c);
 		void writeShort(short s);

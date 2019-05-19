@@ -1,7 +1,11 @@
 #include "Gyro.h"
 
 using namespace myRIO;
+using namespace GyroRegisters;
 
+/**
+* Constructs a helper for sensor L3G4200D
+*/
 Gyro::Gyro() : regs(new uint8_t[6]), gyroStatusVal(0), xOff(0), yOff(0), zOff(0), th(nullptr), run(new bool) {
 	gyro = I2C::open()->slave(0b11010010);
 
@@ -20,6 +24,11 @@ Gyro::Gyro() : regs(new uint8_t[6]), gyroStatusVal(0), xOff(0), yOff(0), zOff(0)
 		status = -1;
 }
 
+/**
+* Compute the offset from error of the last X samples
+* The gyro must be on a plane surface.
+* @param samples the number of samples to average the offset from
+*/
 void Gyro::calibrate(short samples) {
 	double x[samples], y[samples], z[samples];
 
@@ -52,6 +61,12 @@ void Gyro::calibrate(short samples) {
 	zOff/=samples;
 }
 
+/**
+* Read all X, Y and Z values from the gyro registers
+* @param vx x value
+* @param vy y value
+* @param vz z value
+*/
 void Gyro::readGyro(double&vx, double&vy, double&vz) {
 	gyroStatusVal = 0;
 
@@ -73,7 +88,10 @@ void Gyro::readGyro(double&vx, double&vy, double&vz) {
 	vz-=zOff;
 }
 
-
+/**
+* Start a thread to run infinitely that will check the gyro values
+* @param func callback function, that will receive the elapsed time and the x value
+*/
 void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 	*run = true;
 
@@ -87,7 +105,7 @@ void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 			while(!gyroStatusVal&(1<<3)) {
 				if(!gyro->read(L3G4200D_STATUS_REG, &gyroStatusVal) || status!=0) {
 					status = -1;
-					printf("Error\n");
+					printf("Gyro - Error\n");
 					return;
 				}
 			}
@@ -95,17 +113,21 @@ void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 			// read that new data
 			if(!gyro->readFrom(L3G4200D_OUT_X_L, regs, 2) || status != 0) {
 				status = -1;
-				printf("Error\n");
+				printf("Gyro - Error\n");
 				return;
 			}
 
+			// registers are L_H, we need it H_L
 			vx = (short)((regs[1]<<8) | regs[0]);
+			// 250dps sensitivity
 			vx*=0.00875;
+			// remove the offset
 			vx-=xOff;
 
+			// do not trust too much that value
 			vx = vx*0.3 + oldvx*0.7;
 			oldvx = vx;
-
+			
 			dt = stopwatch.elapsed_ns() * 1e-9;
 
 			func(vx, dt);
@@ -116,11 +138,16 @@ void Gyro::startFreeRunningMode(std::function<void(double&, double&)> func) {
 	th->detach();
 }
 
+/**
+* Stop the running thread
+*/
 void Gyro::stopFreeRunningMode() {
 	*run = false;
 }
 
-
+/**
+* Close the thread if it was running
+*/
 Gyro::~Gyro() {
 	if(*run)
 		*run = false;

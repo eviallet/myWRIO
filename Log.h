@@ -3,7 +3,13 @@
 
 #include <iostream>
 #include <fstream>
+#include "MyRIO.h"
 
+namespace myRIO {
+
+/**
+* Easily print data to a log file
+*/
 class Log {
 public:
 	Log(std::string filename, char sep = ' ');
@@ -15,7 +21,9 @@ public:
 	void close();
 private:
 	std::ofstream file;
-	char sep;
+	char sep; /**< The separator between each value on a line (ex a space, a column..) */
 };
+
+}
 
 #endif

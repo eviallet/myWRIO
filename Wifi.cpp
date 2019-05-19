@@ -2,8 +2,13 @@
 
 using namespace myRIO;
 
-// https://www.geeksforgeeks.org/socket-programming-cc/
-// http://manpages.ubuntu.com/manpages/cosmic/en/man2/accept.2.html
+
+
+/**
+* Create a Wifi handler.
+* This detach a thread so it can read and write synchronously without blocking other tasks.
+* @param func function to call when receiving data
+*/
 Wifi::Wifi(std::function<void(short setpoint)> func) : connected(false), _socket(0), _func(func) {
 	_socketThread = std::thread([&]() {
 			openServer();
@@ -12,6 +17,12 @@ Wifi::Wifi(std::function<void(short setpoint)> func) : connected(false), _socket
 	_socketThread.detach();
 }
 
+/**
+* Create a wifi server.
+* Ressources used to understand C socket programming : 
+* https://www.geeksforgeeks.org/socket-programming-cc/
+* http://manpages.ubuntu.com/manpages/cosmic/en/man2/accept.2.html
+*/
 void Wifi::openServer() {
 	int inBytes;
 	short val;
@@ -68,35 +79,50 @@ void Wifi::openServer() {
 	} while(true);
 }
 
+/**
+* Send data to the client
+* @param angle the angle to send
+*/
 void Wifi::updateAngle(short angle) {
 	if(connected)
 		writeShort(angle);
 }
 
-void Wifi::updateEncoder(uint8_t setpoint, uint32_t enc) {
-	if(connected) {
-		writeChar('#');
-		writeShort(setpoint);
-		writeLong(enc);
-	}
-}
-
+/**
+* Returns the state of the socket
+* @return true if wifi is connected
+*/
 bool Wifi::isConnected() {
 	return connected;
 }
 
+/**
+* Write a char to the socket
+* @param c a char to write
+*/
 void Wifi::writeChar(char c) {
 	write(_socket, reinterpret_cast<const char*>(&c), sizeof(char));
 }
 
+/**
+* Write a short to the socket
+* @param s a short to write
+*/
 void Wifi::writeShort(short s) {
 	write(_socket, reinterpret_cast<const char*>(&s), sizeof(short));
 }
 
+/**
+* Write a long to the socket
+* @param l a long to write
+*/
 void Wifi::writeLong(long l) {
 	write(_socket, reinterpret_cast<const char*>(&l), sizeof(long));
 }
 
+/**
+* Close the socket if we are still connected
+*/
 Wifi::~Wifi() {
 	if(connected) {
 		writeShort(30000);

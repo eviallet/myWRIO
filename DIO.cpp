@@ -5,6 +5,10 @@ extern NiFpga_Session myrio_session; // global variable defined in CAPI/MyRio.c
 
 uint8_t DIO::DOLED30_Status = 0;
 
+/** Write to a led
+* @param led the led that you want to write to
+* @param state the state of the led; 1 = HIGH , 0 = LOW
+*/
 void DIO::writeLed(int led, bool state) {
 	if(state) DOLED30_Status |= (1<<led);
 	else	  DOLED30_Status &=~(1<<led);
@@ -12,6 +16,13 @@ void DIO::writeLed(int led, bool state) {
 	status = NiFpga_WriteU8(myrio_session, DOLED30, DOLED30_Status);
 }
 
+/** 
+* Parses the necessary registers to read or write a pin.
+* @param pin the concerned pin, one of A0, A1... C7
+* @param dirReg will contain the direction register for the pin
+* @param pinsReg will contain the port in/out register for the pin
+* @param io one of IN/OUT
+*/
 void DIO::parsePin(int pin, uint32_t *dirReg, uint32_t *pinsReg, bool io) {
 	if(pin<A_LAST/2) {
 		*dirReg = DIOA_70DIR;
@@ -31,7 +42,10 @@ void DIO::parsePin(int pin, uint32_t *dirReg, uint32_t *pinsReg, bool io) {
 	}
 }
 
-
+/** Write to a pin
+* @param pin the pin of the myRio that you want to write to
+* @param state the state of the pin; 1 = HIGH , 0 = LOW
+*/
 void DIO::writePin(int pin, bool state) {
 	uint32_t dirReg, pinsReg;
 	parsePin(pin, &dirReg, &pinsReg, OUT);
@@ -47,7 +61,7 @@ void DIO::writePin(int pin, bool state) {
     MyRio_ReturnIfNotSuccess(status,
             "Could not read the DIO!");
 
-	dirVal |= (1<<relPin); // make sur that the pin is an output
+	dirVal |= (1<<relPin); // make sure that the pin is an output
 
 	if(state) pinVal |= (1<<relPin);
 	else	  pinVal &=~(1<<relPin);
@@ -62,6 +76,10 @@ void DIO::writePin(int pin, bool state) {
 
 }
 
+/** Read the state of a pin
+* @param pin the pin of the myRio that you want to read from
+* @return the state of the pin
+*/
 int DIO::readPin(int pin) {
 	uint32_t dirReg, pinsReg;
 	parsePin(pin, &dirReg, &pinsReg, IN);

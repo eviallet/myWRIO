@@ -10,13 +10,13 @@
 
 namespace myRIO {
 
-	// IN/OUT
+	/** IN/OUT pin direction */
 	enum {
 		IN,
 		OUT
 	};
 
-	// LEDS
+	/** LEDs on the chassis */
 	enum {
 		LED0,
 		LED1,
@@ -24,7 +24,7 @@ namespace myRIO {
 		LED3
 	};
 
-	// A Port DIO
+	/** A port DIO */
 	enum {
 		A0,
 		A1,
@@ -45,7 +45,7 @@ namespace myRIO {
 		A_LAST
 	};
 
-	// B Port DIO
+	/** B port DIO */
 	enum {
 		B0 = A_LAST,
 		B1,
@@ -66,7 +66,7 @@ namespace myRIO {
 		B_LAST
 	};
 
-	// C Port DIO
+	/** C port DIO */
 	enum {
 		C0 = B_LAST,
 		C1,
@@ -79,6 +79,9 @@ namespace myRIO {
 		C_LAST
 	};
 
+	/**
+	* Digital input/output
+	*/
 	class DIO {
 	public:
 		static void writeLed(int led, bool state);
@@ -87,6 +90,8 @@ namespace myRIO {
 	private:
 		static void parsePin(int pin, uint32_t *dirReg, uint32_t *pinsReg, bool io);
 		static uint8_t DOLED30_Status;
+		/**< Say LED2 is HIGH, so DOLED30 is 0100. If you set LED3 to HIGH, so 1000, without saving the other LEDs,
+		 * you will only be able to use them one at a time.  */
 	};
 } // namespace
 

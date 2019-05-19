@@ -6,6 +6,9 @@
 
 namespace myRIO {
 
+/**
+ * I2C_CNTL contains informations about the procedure to come.
+ */
 union I2C_CNTL {
 	uint8_t data;
 	struct {
@@ -16,16 +19,25 @@ union I2C_CNTL {
 	};
 };
 
+/**
+ * Speed of the I2C bus
+ */
 enum {
 	SPD_100KBPS = 100,
 	SPD_400KBPS = 400
 };
 
+/**
+ * Read or write state
+ */
 enum {
 	I2C_WRITE,
 	I2C_READ
 };
 
+/**
+ * In this configuration, myRIO will always be the master.
+ */
 class I2C {
 public:
 	static I2C *open();
@@ -46,8 +58,8 @@ private:
 	bool checkErrors(uint8_t state);
 
 
-	uint8_t slaveAddr;
-	uint8_t cntr;
+	uint8_t slaveAddr; /**< Slave address */
+	uint8_t cntr; /**< Contains informations relative to the procedure to come. */
 };
 
 } /* namespace myRIO */

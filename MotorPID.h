@@ -8,28 +8,36 @@
 
 namespace myRIO {
 
+/**
+ * This class can be used to regulate a motor speed.
+ */
 class MotorPID {
 public:
 	MotorPID(double kp, double ki);
 
 	double compute(long enc);
 	void setSetpoint(double setpoint);
+	double getSetpoint();
 
 	double getAvgSpeed();
 
 	~MotorPID();
 private:
-	Time stopwatch;
+	Time stopwatch; /**< Timer to get the elapsed tiem since the last refresh */
 
 	const double toAngularSpeed = 360./(12.*52.734);
+	/**< The encoder gives 12 clock edges for a complete turn (360°). The gear ratio is 1/52.734 ; hence, an edge is 0.568893° */
 
-	double lastSpeeds[NB_AVG];
+	double lastSpeeds[NB_AVG]; /**< Moving average filter */
 
-	long lastEnc;
-	double setpoint;
-	double errSum;
+	long lastEnc; /**< The value of the encoder, last time mesured*/
+	double setpoint; /**< The setpoint of the motors*/
+	double errSum; /**< The sum of the errors
+	* Errors from integration.
+	*/
 
-	double kp, ki;
+	double kp; /**< Proportional coefficient*/
+	double ki; /**< integral coefficient*/
 };
 
 }
