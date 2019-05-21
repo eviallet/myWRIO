@@ -16,7 +16,7 @@ namespace myRIO {
 		BO0 = AOB_0VAL,
 		BO1 = AOB_1VAL,
 		CO0 = AOC_0VAL,
-		CO1 = AOC_0VAL
+		CO1 = AOC_1VAL
 	};
 	
 	/** Analog inputs ports */
@@ -30,7 +30,7 @@ namespace myRIO {
 		BI2 = AIB_2VAL,
 		BI3 = AIB_3VAL,
 		CI0 = AIC_0VAL,
-		CI1 = AIC_0VAL
+		CI1 = AIC_1VAL
 	};
 	
 	

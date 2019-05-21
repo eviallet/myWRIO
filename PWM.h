@@ -32,14 +32,18 @@ namespace myRIO {
  */
 class PWM {
 public:
-	PWM(uint32_t out, long frequency, double duty_cycle);
+	PWM(uint32_t out, double frequency, double duty_cycle, short prescaler = 1);
 	void setDutyCycle(double dutyCycle);
+	void setPrescaler(short prescaler);
+	void setFrequency(double frequency);
 	~PWM();
 private:
 	uint32_t out; /**< Pin PWM*/
 	uint16_t max; /**< Max value that the PWM counts
 	* the counter that generates the PWM signal counts up to the max value to  generate the signal that we want*/
 	double dutyCycle; /**< PWM Duty Cycle*/
+	double frequency; /**< PWM Frequency */
+	uint16_t prescaler; /**< PWM Clock prescaler */
 	uint32_t outcs; /**< PWM Clock Select register*/
 	uint32_t outmax; /**< PWM Max register*/
 	uint32_t outcmp; /**< PWM Compare register*/

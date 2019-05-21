@@ -28,6 +28,7 @@ void Wifi::openServer() {
 	short val;
 	char buffer[2];
 	
+	// opening a server : AF_INET (IPv4), SOCK_STREAM (TCP)
 	int err, opt = 1;
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(server_fd==0) { perror("socket"); return; }
@@ -35,23 +36,28 @@ void Wifi::openServer() {
 	err = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE, &opt, sizeof(opt));
 	if(err) { perror("setsockopt"); return; }
 
+	// defining server address and port
 	struct sockaddr_in server_addr;
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(50000);
 
+	// binding the server address
 	err = bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	if(err<0) { perror("bind"); return; }
 
+	// listening for incoming connections : blocking
 	err = listen(server_fd, 10);
 	if(err<0) { perror("listen"); return; }
 	
 	do {
 		val = 0;
-
+		
 		struct sockaddr client_addr = {0};
 		socklen_t client_addr_size = sizeof(client_addr);
 		std::cout << "Wifi - Waiting for connection" << std::endl;
+		
+		// wait for a client connection
 		_socket = accept(server_fd, &client_addr, &client_addr_size);
 		if(_socket==-1) { perror("accept"); return; }
 

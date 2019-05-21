@@ -7,8 +7,9 @@ extern NiFpga_Session myrio_session;
 *@param out the pin where the PWM signal will be created (PWM0, PWM1)
 *@param frequency the frequency of the PWM signal
 *@param duty_cycle the duty cycle of the signal; for 50%, duty_cycle = 50
+*@param prescaler the clock prescaler. Must be a power of 2 between 1 and 64.
 */
-PWM::PWM(uint32_t out, long frequency, double duty_cycle) : out(out), dutyCycle(duty_cycle) {
+PWM::PWM(uint32_t out, double frequency, double duty_cycle, short prescaler) : out(out), dutyCycle(duty_cycle), frequency(frequency), prescaler(prescaler) {
 	uint8_t select, pin;
 	// Activate the PWM signals in the selected pin 
 	if(out == PWMA_0CNFG || out == PWMA_1CNFG || out == PWMA_2CNFG) {
@@ -42,8 +43,6 @@ PWM::PWM(uint32_t out, long frequency, double duty_cycle) : out(out), dutyCycle(
 		return;
 	}
 
-	max = (long)40e6/(32*frequency)-1; //Maximum value that the PWM counts
-	
 	// Selection of the needed PWM registers (can be configured as needed)
 	if(out == PWMA_0CNFG){
 		outcs = PWMA_0CS;
@@ -93,18 +92,38 @@ PWM::PWM(uint32_t out, long frequency, double duty_cycle) : out(out), dutyCycle(
 			NiFpga_WriteU8(myrio_session, out, 0b100)); //PWM generation mode , not inverted (can be configured as needed)
 	NiFpga_MergeStatus(&status, 
 			NiFpga_WriteU8(myrio_session, outcs, 0b110)); // Clock divider : 32 (can be configured as needed)
-	NiFpga_MergeStatus(&status, 
-			NiFpga_WriteU16(myrio_session, outmax, max));
 
-	setDutyCycle(duty_cycle);
+
+	setPrescaler(prescaler); // will also set the frequency and the duty cycle
 }
 
-/** Set Duty Cycle
-*@param dutyCycle set the duty cycle
+/** Set the Duty Cycle
+*@param dutyCycle the duty cycle to set
 */
 void PWM::setDutyCycle(double dutyCycle) {
 	uint16_t cmp = round((double)max*dutyCycle/100.0);
 	status = NiFpga_WriteU16(myrio_session, outcmp, cmp);
+}
+
+/** Set the Frequency
+* Will try to keep the current duty cycle.
+*@param frequency the frequency to set
+*/
+void PWM::setFrequency(double frequency) {
+	this->frequency = frequency;
+	max = (long)40e6/(prescaler*frequency)-1; //Maximum value that the PWM counts
+	NiFpga_MergeStatus(&status, 
+		NiFpga_WriteU16(myrio_session, outmax, max));
+	setDutyCycle(dutyCycle);
+}
+
+/** Set the clock prescaler
+* Will try to keep the old frequency.
+*@param clockDiv the prescaler. Must be 1, 2, 4, 8, 16, 32 or 64
+*/
+void PWM::setPrescaler(short clockDiv) {
+	prescaler = clockDiv;
+	setFrequency(frequency);
 }
 
 /**Destructor

@@ -58,7 +58,7 @@ void Encoder::direction(bool &dir) {
  * Start a thread that will monitor the encoder register.
  * It will alert the user if a given threshold is reached, executing the given function.
  * The threshold is a variation since the last threshold reach (or 0 if none have been reached)
- * 1 increment ~ 0.58°, @see MotorPID.toAngularSpeed
+ * 1 increment ~ 0.58°, @see MotorPID::toAngularSpeed
  * @param func a function to execute when threshold is reached
  * @param threshold the number of increments before executing the function
 */
