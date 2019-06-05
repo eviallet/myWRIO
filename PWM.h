@@ -32,7 +32,7 @@ namespace myRIO {
  */
 class PWM {
 public:
-	PWM(uint32_t out, double frequency, double duty_cycle, short prescaler = 1);
+	PWM(uint32_t out, double frequency, double duty_cycle, short prescaler = 0b110);
 	void setDutyCycle(double dutyCycle);
 	void setPrescaler(short prescaler);
 	void setFrequency(double frequency);

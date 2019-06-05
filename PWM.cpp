@@ -7,7 +7,7 @@ extern NiFpga_Session myrio_session;
 *@param out the pin where the PWM signal will be created (PWM0, PWM1)
 *@param frequency the frequency of the PWM signal
 *@param duty_cycle the duty cycle of the signal; for 50%, duty_cycle = 50
-*@param prescaler the clock prescaler. Must be a power of 2 between 1 and 64.
+*@param prescaler the clock prescaler. Must be a power of 2 between 1 and 64 in bits : 0b001 = 1, 0b010 = 2, 0b011 = 4...
 */
 PWM::PWM(uint32_t out, double frequency, double duty_cycle, short prescaler) : out(out), dutyCycle(duty_cycle), frequency(frequency), prescaler(prescaler) {
 	uint8_t select, pin;
@@ -91,7 +91,7 @@ PWM::PWM(uint32_t out, double frequency, double duty_cycle, short prescaler) : o
 	NiFpga_MergeStatus(&status, 
 			NiFpga_WriteU8(myrio_session, out, 0b100)); //PWM generation mode , not inverted (can be configured as needed)
 	NiFpga_MergeStatus(&status, 
-			NiFpga_WriteU8(myrio_session, outcs, 0b110)); // Clock divider : 32 (can be configured as needed)
+			NiFpga_WriteU8(myrio_session, outcs, prescaler)); // Clock divider : 32 (can be configured as needed)
 
 
 	setPrescaler(prescaler); // will also set the frequency and the duty cycle

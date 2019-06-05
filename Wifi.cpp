@@ -9,7 +9,7 @@ using namespace myRIO;
 * This detach a thread so it can read and write synchronously without blocking other tasks.
 * @param func function to call when receiving data
 */
-Wifi::Wifi(std::function<void(short setpoint)> func) : connected(false), _socket(0), _func(func) {
+Wifi::Wifi(std::function<void(long setpoint)> func) : connected(false), _socket(0), _func(func) {
 	_socketThread = std::thread([&]() {
 			openServer();
 		}
@@ -25,7 +25,7 @@ Wifi::Wifi(std::function<void(short setpoint)> func) : connected(false), _socket
 */
 void Wifi::openServer() {
 	int inBytes;
-	short val;
+	long val;
 	char buffer[2];
 	
 	// opening a server : AF_INET (IPv4), SOCK_STREAM (TCP)
@@ -68,8 +68,8 @@ void Wifi::openServer() {
 			ioctl(_socket, FIONREAD, &inBytes);
 
 			if(inBytes>0) {
-				read(_socket , buffer, 2);
-				val = buffer[1]<<8 | buffer[0];
+				read(_socket , buffer, 4);
+				val = buffer[3]<<24 | buffer[2]<<16 | buffer[1]<<8 | buffer[0];
 				if(val != 30000)
 					_func(val);
 			}

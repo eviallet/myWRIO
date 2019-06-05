@@ -17,7 +17,7 @@ namespace myRIO {
 	*/
 	class Wifi {
 	public:
-		Wifi(std::function<void(short)> func);
+		Wifi(std::function<void(long)> func);
 		~Wifi();
 		
 		void openServer();
@@ -28,7 +28,7 @@ namespace myRIO {
 		bool connected;
 		int _socket;
 		std::thread _socketThread;
-		std::function<void(short)> _func; /**< Function to call when receiving data */
+		std::function<void(long)> _func; /**< Function to call when receiving data */
 
 		void writeChar(char c);
 		void writeShort(short s);
