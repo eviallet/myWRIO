@@ -7,6 +7,7 @@ It is based on the official C API, but handles registers communications to provi
 [Documentation found here](https://github.com/eviallet/myWRIO-Docs)
 
 The docs are generated with Doxygen. Each line of code is documented and examples are provided for each class.
+There is a guide to setup Eclipse to use our API.
 
 * Blink a LED
 
@@ -65,7 +66,9 @@ int main() {
 }
 ```
 
-* 
+
+
+____________________________
 
 
 
